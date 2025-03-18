@@ -9,29 +9,36 @@ DOCKERHUB_SECRET_NAME = "dockerhub-secret"
 @app.route("/mutate", methods=["POST"])
 def mutate():
     req = request.get_json()
+    
+    if "request" not in req:
+        return jsonify({"error": "Invalid AdmissionReview request"}), 400
+
     uid = req["request"]["uid"]
     service_account = req["request"]["object"]
 
     # Ensure 'imagePullSecrets' exists
+    patches = []
     if "imagePullSecrets" not in service_account:
-        service_account["imagePullSecrets"] = []
+        patches.append({"op": "add", "path": "/imagePullSecrets", "value": []})
 
     # Add 'dockerhub-secret' if not already present
-    if not any(secret["name"] == DOCKERHUB_SECRET_NAME for secret in service_account["imagePullSecrets"]):
-        service_account["imagePullSecrets"].append({"name": DOCKERHUB_SECRET_NAME})
+    if not any(secret["name"] == DOCKERHUB_SECRET_NAME for secret in service_account.get("imagePullSecrets", [])):
+        patches.append({"op": "add", "path": "/imagePullSecrets/-", "value": {"name": DOCKERHUB_SECRET_NAME}})
 
-    # Create JSON Patch
-    patch = [{"op": "add", "path": "/imagePullSecrets/-", "value": {"name": DOCKERHUB_SECRET_NAME}}]
-    patch_b64 = base64.b64encode(json.dumps(patch).encode()).decode()
+    patch_b64 = base64.b64encode(json.dumps(patches).encode()).decode()
 
-    return jsonify({
+    response = {
+        "apiVersion": "admission.k8s.io/v1",
+        "kind": "AdmissionReview",
         "response": {
             "uid": uid,
             "allowed": True,
             "patchType": "JSONPatch",
             "patch": patch_b64
         }
-    })
+    }
+
+    return jsonify(response)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8124, ssl_context=("/certs/tls.crt", "/certs/tls.key"))
+    app.run(host="0.0.0.0", port=443, ssl_context=("/certs/tls.crt", "/certs/tls.key"))
