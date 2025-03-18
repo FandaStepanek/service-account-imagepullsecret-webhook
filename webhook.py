@@ -41,4 +41,4 @@ def mutate():
     return jsonify(response)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=443, ssl_context=("/certs/tls.crt", "/certs/tls.key"))
+    app.run(host="0.0.0.0", port=8124, ssl_context=("/certs/tls.crt", "/certs/tls.key"))
