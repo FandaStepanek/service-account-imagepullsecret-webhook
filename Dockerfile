@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "webhook.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:8124", "--certfile=/certs/tls.crt", "--keyfile=/certs/tls.key", "webhook:app"]
