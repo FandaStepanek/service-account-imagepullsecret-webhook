@@ -46,7 +46,8 @@ def copy_secret_to_namespace(namespace):
 
     response = requests.get(url_get, headers=headers, verify=K8S_CA_PATH)
     
-    app.logger.info(f"Response: {response}")
+    app.logger.info(f"Response code: {response.status_code}")
+    app.logger.info(f"Response text: {response.text}")
     if response.status_code != 200:
         app.logger.info(f" ERROR: Failed to get `{DOCKERHUB_SECRET_NAME}` from `{DEFAULT_NAMESPACE}`")
         return False
