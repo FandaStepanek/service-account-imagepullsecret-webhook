@@ -28,6 +28,8 @@ def check_secret_exists(namespace):
     headers = {"Authorization": f"Bearer {get_k8s_token()}"}
 
     response = requests.get(url, headers=headers, verify=K8S_CA_PATH)
+    app.logger.info(f"Response code: {response.status_code}")
+    app.logger.info(f"Response text: {response.text}")
     return response.status_code == 200  # Returns True if secret exists
 
 def copy_secret_to_namespace(namespace):
