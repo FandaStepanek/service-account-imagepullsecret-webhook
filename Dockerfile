@@ -1,8 +1,10 @@
-FROM python:3.9
+FROM python:3.10
 
 WORKDIR /app
-COPY webhook.py /app/webhook.py
 
-RUN pip install flask
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "/app/webhook.py"]
+COPY . .
+
+CMD ["python", "webhook.py"]
