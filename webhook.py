@@ -15,7 +15,7 @@ K8S_CA_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
 # Secret Config
 DOCKERHUB_SECRET_NAME = "dockerhub-secret"
-DEFAULT_NAMESPACE = os.getenv("K8S_API_SERVER", "default")
+DEFAULT_NAMESPACE = os.getenv("DEFAULT_NAMESPACE", "default")
 
 def get_k8s_token():
     """ Reads Kubernetes service account token for API authentication """
