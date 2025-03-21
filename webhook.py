@@ -76,6 +76,7 @@ def mutate():
     if object_kind == "ServiceAccount":
         namespace = req["request"]["namespace"]
         service_account = req["request"]["object"]
+        service_account_name = req["request"]["object"]["metadata"]["name"]
         patches = []
 
         # Ensure `dockerhub-secret` exists in the namespace
@@ -91,7 +92,7 @@ def mutate():
 
         patch_b64 = base64.b64encode(json.dumps(patches).encode()).decode()
 
-        app.logger.info(f"Patched service account '{service_account["metadata"]["name"]}' in namespace '{namespace}'")
+        app.logger.info(f"Patched service account '{service_account_name}' in namespace '{namespace}'")
         response = {
             "apiVersion": "admission.k8s.io/v1",
             "kind": "AdmissionReview",
