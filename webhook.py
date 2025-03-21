@@ -28,8 +28,6 @@ def check_secret_exists(namespace):
     headers = {"Authorization": f"Bearer {get_k8s_token()}"}
 
     response = requests.get(url, headers=headers, verify=K8S_CA_PATH)
-    app.logger.info(f"Response code: {response.status_code}")
-    app.logger.info(f"Response text: {response.text}")
     return response.status_code == 200  # Returns True if secret exists
 
 def copy_secret_to_namespace(namespace):
@@ -38,7 +36,6 @@ def copy_secret_to_namespace(namespace):
     url_get = f"{K8S_API_SERVER}/api/v1/namespaces/{DEFAULT_NAMESPACE}/secrets/{DOCKERHUB_SECRET_NAME}"
     url_create = f"{K8S_API_SERVER}/api/v1/namespaces/{namespace}/secrets"
     token = get_k8s_token()
-    app.logger.info(f"Using token: {token}")
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -46,8 +43,6 @@ def copy_secret_to_namespace(namespace):
 
     response = requests.get(url_get, headers=headers, verify=K8S_CA_PATH)
     
-    app.logger.info(f"Response code: {response.status_code}")
-    app.logger.info(f"Response text: {response.text}")
     if response.status_code != 200:
         app.logger.info(f" ERROR: Failed to get `{DOCKERHUB_SECRET_NAME}` from `{DEFAULT_NAMESPACE}`")
         return False
@@ -84,7 +79,6 @@ def mutate():
         patches = []
 
         # Ensure `dockerhub-secret` exists in the namespace
-        app.logger.info(f"Inspecting namespace: {namespace}")
         if not check_secret_exists(namespace):
             copy_secret_to_namespace(namespace)
 
@@ -97,6 +91,7 @@ def mutate():
 
         patch_b64 = base64.b64encode(json.dumps(patches).encode()).decode()
 
+        app.logger.info(f"Patched service account '{service_account["metadata"]["name"]}' in namespace '{namespace}'")
         response = {
             "apiVersion": "admission.k8s.io/v1",
             "kind": "AdmissionReview",
